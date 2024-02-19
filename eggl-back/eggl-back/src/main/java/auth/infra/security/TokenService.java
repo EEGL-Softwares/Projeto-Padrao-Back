@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Map;
+import com.google.gson.Gson;
 
 @Service
 public class TokenService {
@@ -19,11 +21,17 @@ public class TokenService {
 
     public String generateToken(User user){
         try{
+            JWTPayload jwtPayload = new JWTPayload(user);
+            Gson gson = new Gson();
+
+
+
             Algorithm algorithm = Algorithm.HMAC256(secret);
             String token = JWT.create()
                     .withIssuer("auth-api")
                     .withSubject(user.getLogin())
-                    .withExpiresAt(genExpirationDate()).withPayload(user.getId()).withPayload(user.getUsername())
+                    .withPayload(gson.toJson(jwtPayload))
+                    .withExpiresAt(genExpirationDate())
                     .sign(algorithm);
             return token;
         } catch (JWTCreationException exception) {
